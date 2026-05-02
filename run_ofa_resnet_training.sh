@@ -20,19 +20,24 @@ set -euo pipefail
 # ── Defaults ────────────────────────────────────────────────────────────────
 NPROC_PER_NODE=8
 CHECKPOINT_DIR="/coc/scratch/dgarg/ofa_checkpoints"
-IMAGENET_PATH=""
+IMAGENET_PATH="/coc/data/datasets/ImageNet"
 FORCE=0
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Track which values came from the user vs defaults
+_SRC_NPROC="default"
+_SRC_CKPT="default"
+_SRC_IMGNET="default"
+_SRC_FORCE="default"
 
 # ── Argument parsing ─────────────────────────────────────────────────────────
 usage() {
     cat <<EOF
-Usage: $0 --imagenet_path PATH [options]
-
-Required:
-  --imagenet_path PATH    ImageNet root (must contain train/ and val/)
+Usage: $0 [options]
 
 Options:
+  --imagenet_path PATH    ImageNet root, must contain train/ and val/
+                          (default: /coc/data/datasets/ImageNet)
   --nproc_per_node N      GPUs to use per node (default: 8)
   --checkpoint_dir DIR    Root dir for all checkpoints
                           (default: /coc/scratch/dgarg/ofa_checkpoints)
@@ -44,18 +49,19 @@ EOF
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --nproc_per_node)  NPROC_PER_NODE="$2"; shift 2 ;;
-        --checkpoint_dir)  CHECKPOINT_DIR="$2";  shift 2 ;;
-        --imagenet_path)   IMAGENET_PATH="$2";   shift 2 ;;
-        --force)           FORCE=1;              shift   ;;
+        --nproc_per_node)  NPROC_PER_NODE="$2"; _SRC_NPROC="user";  shift 2 ;;
+        --checkpoint_dir)  CHECKPOINT_DIR="$2";  _SRC_CKPT="user";   shift 2 ;;
+        --imagenet_path)   IMAGENET_PATH="$2";   _SRC_IMGNET="user"; shift 2 ;;
+        --force)           FORCE=1;              _SRC_FORCE="user";  shift   ;;
         -h|--help)         usage ;;
         *) echo "ERROR: Unknown argument: $1"; usage ;;
     esac
 done
 
-if [[ -z "$IMAGENET_PATH" ]]; then
-    echo "ERROR: --imagenet_path is required"
-    usage
+if [[ ! -d "$IMAGENET_PATH" ]]; then
+    echo "ERROR: ImageNet path does not exist: $IMAGENET_PATH"
+    echo "       Override with --imagenet_path PATH"
+    exit 1
 fi
 
 # ── Setup ────────────────────────────────────────────────────────────────────
@@ -152,13 +158,16 @@ W2="$CHECKPOINT_DIR/width/phase2/checkpoint/model_best.pth.tar"
 D1="$CHECKPOINT_DIR/depth/phase1/checkpoint/model_best.pth.tar"
 
 # ── Run all phases ───────────────────────────────────────────────────────────
+_tag() { [[ "$1" == "user" ]] && echo "user-specified" || echo "default"; }
+
 echo ""
 echo "════════════════════════════════════════════════════════════════════"
 echo "  OFA-ResNet50 training pipeline"
-echo "  checkpoint dir : $CHECKPOINT_DIR"
-echo "  imagenet       : $IMAGENET_PATH"
-echo "  GPUs per node  : $NPROC_PER_NODE"
-echo "  force re-run   : $( [[ $FORCE -eq 1 ]] && echo yes || echo no )"
+echo "────────────────────────────────────────────────────────────────────"
+printf "  %-18s %s  [%s]\n" "imagenet_path:"   "$IMAGENET_PATH"                  "$(_tag "$_SRC_IMGNET")"
+printf "  %-18s %s  [%s]\n" "checkpoint_dir:"  "$CHECKPOINT_DIR"                 "$(_tag "$_SRC_CKPT")"
+printf "  %-18s %s  [%s]\n" "nproc_per_node:"  "$NPROC_PER_NODE"                 "$(_tag "$_SRC_NPROC")"
+printf "  %-18s %s  [%s]\n" "force:"           "$( [[ $FORCE -eq 1 ]] && echo yes || echo no )"  "$(_tag "$_SRC_FORCE")"
 echo "════════════════════════════════════════════════════════════════════"
 
 run_phase  expand  1  "$PRETRAINED";  pause_between_phases
