@@ -30,6 +30,14 @@ __all__ = [
 ]
 
 
+def _unwrap_net(net):
+    """Unwrap DataParallel or DistributedDataParallel to get the base module."""
+    from torch.nn.parallel import DistributedDataParallel as DDP
+    if isinstance(net, (nn.DataParallel, DDP)):
+        return net.module
+    return net
+
+
 def validate(
     run_manager,
     epoch=0,
@@ -41,9 +49,7 @@ def validate(
     width_mult_list=None,
     additional_setting=None,
 ):
-    dynamic_net = run_manager.net
-    if isinstance(dynamic_net, nn.DataParallel):
-        dynamic_net = dynamic_net.module
+    dynamic_net = _unwrap_net(run_manager.net)
 
     dynamic_net.eval()
 
@@ -113,7 +119,7 @@ def validate(
 
 
 def train_one_epoch(run_manager, args, epoch, warmup_epochs=0, warmup_lr=0):
-    dynamic_net = run_manager.network
+    dynamic_net = _unwrap_net(run_manager.network)
     distributed = isinstance(run_manager, DistributedRunManager)
 
     # switch to train mode
@@ -278,16 +284,13 @@ def train(run_manager, args, validate_func=None):
 
 
 def load_models(run_manager, dynamic_net, model_path=None):
-    # specify init path
-    init = torch.load(model_path, map_location="cpu")["state_dict"]
+    init = torch.load(model_path, map_location="cpu", weights_only=False)["state_dict"]
     dynamic_net.load_state_dict(init)
     run_manager.write_log("Loaded init from %s" % model_path, "valid")
 
 
 def train_elastic_depth(train_func, run_manager, args, validate_func_dict):
-    dynamic_net = run_manager.net
-    if isinstance(dynamic_net, nn.DataParallel):
-        dynamic_net = dynamic_net.module
+    dynamic_net = _unwrap_net(run_manager.net)
 
     depth_stage_list = dynamic_net.depth_list.copy()
     depth_stage_list.sort(reverse=True)
@@ -337,9 +340,7 @@ def train_elastic_depth(train_func, run_manager, args, validate_func_dict):
 
 
 def train_elastic_expand(train_func, run_manager, args, validate_func_dict):
-    dynamic_net = run_manager.net
-    if isinstance(dynamic_net, nn.DataParallel):
-        dynamic_net = dynamic_net.module
+    dynamic_net = _unwrap_net(run_manager.net)
 
     expand_stage_list = dynamic_net.expand_ratio_list.copy()
     expand_stage_list.sort(reverse=True)
@@ -388,9 +389,7 @@ def train_elastic_expand(train_func, run_manager, args, validate_func_dict):
 
 
 def train_elastic_width_mult(train_func, run_manager, args, validate_func_dict):
-    dynamic_net = run_manager.net
-    if isinstance(dynamic_net, nn.DataParallel):
-        dynamic_net = dynamic_net.module
+    dynamic_net = _unwrap_net(run_manager.net)
 
     width_stage_list = dynamic_net.width_mult_list.copy()
     width_stage_list.sort(reverse=True)

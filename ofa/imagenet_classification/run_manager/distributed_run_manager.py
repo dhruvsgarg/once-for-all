@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
+import torch.distributed as dist
 from tqdm import tqdm
 
 from ofa.utils import (
@@ -32,19 +33,48 @@ from ofa.utils import MyRandomResizedCrop
 __all__ = ["DistributedRunManager"]
 
 
+class _SyncedOptimizer:
+    """Wraps a standard optimizer and all-reduces gradients before each step."""
+
+    def __init__(self, optimizer, net):
+        self._optimizer = optimizer
+        self._net = net
+
+    def zero_grad(self, set_to_none=False):
+        self._optimizer.zero_grad(set_to_none=set_to_none)
+
+    def step(self, closure=None):
+        if dist.is_initialized():
+            world_size = dist.get_world_size()
+            for param_group in self._optimizer.param_groups:
+                for param in param_group["params"]:
+                    if param.grad is not None:
+                        dist.all_reduce(param.grad.data, op=dist.ReduceOp.SUM)
+                        param.grad.data /= world_size
+        return self._optimizer.step(closure)
+
+    def state_dict(self):
+        return self._optimizer.state_dict()
+
+    def load_state_dict(self, state_dict):
+        self._optimizer.load_state_dict(state_dict)
+
+    @property
+    def param_groups(self):
+        return self._optimizer.param_groups
+
+
 class DistributedRunManager:
     def __init__(
         self,
         path,
         net,
         run_config,
-        hvd_compression,
+        hvd_compression=None,  # kept for API compatibility, unused
         backward_steps=1,
         is_root=False,
         init=True,
     ):
-        import horovod.torch as hvd
-
         self.path = path
         self.net = net
         self.run_config = run_config
@@ -60,7 +90,6 @@ class DistributedRunManager:
         if init and self.is_root:
             init_models(self.net, self.run_config.model_init)
         if self.is_root:
-            # print net info
             net_info = get_net_info(self.net, self.run_config.data_provider.data_shape)
             with open("%s/net_info.txt" % self.path, "w") as fout:
                 fout.write(json.dumps(net_info, indent=4) + "\n")
@@ -93,29 +122,16 @@ class DistributedRunManager:
         if self.run_config.no_decay_keys:
             keys = self.run_config.no_decay_keys.split("#")
             net_params = [
-                self.net.get_parameters(
-                    keys, mode="exclude"
-                ),  # parameters with weight decay
-                self.net.get_parameters(
-                    keys, mode="include"
-                ),  # parameters without weight decay
+                self.net.get_parameters(keys, mode="exclude"),
+                self.net.get_parameters(keys, mode="include"),
             ]
         else:
-            # noinspection PyBroadException
             try:
                 net_params = self.network.weight_parameters()
             except Exception:
-                net_params = []
-                for param in self.network.parameters():
-                    if param.requires_grad:
-                        net_params.append(param)
-        self.optimizer = self.run_config.build_optimizer(net_params)
-        self.optimizer = hvd.DistributedOptimizer(
-            self.optimizer,
-            named_parameters=self.net.named_parameters(),
-            compression=hvd_compression,
-            backward_passes_per_step=backward_steps,
-        )
+                net_params = [p for p in self.network.parameters() if p.requires_grad]
+        base_optimizer = self.run_config.build_optimizer(net_params)
+        self.optimizer = _SyncedOptimizer(base_optimizer, self.net)
 
     """ save path and log path """
 
@@ -188,49 +204,47 @@ class DistributedRunManager:
                 torch.save({"state_dict": checkpoint["state_dict"]}, best_path)
 
     def load_model(self, model_fname=None):
-        if self.is_root:
-            latest_fname = os.path.join(self.save_path, "latest.txt")
-            if model_fname is None and os.path.exists(latest_fname):
-                with open(latest_fname, "r") as fin:
-                    model_fname = fin.readline()
-                    if model_fname[-1] == "\n":
-                        model_fname = model_fname[:-1]
-            # noinspection PyBroadException
-            try:
-                if model_fname is None or not os.path.exists(model_fname):
-                    model_fname = "%s/checkpoint.pth.tar" % self.save_path
-                    with open(latest_fname, "w") as fout:
-                        fout.write(model_fname + "\n")
+        latest_fname = os.path.join(self.save_path, "latest.txt")
+        if model_fname is None and os.path.exists(latest_fname):
+            with open(latest_fname, "r") as fin:
+                model_fname = fin.readline().strip()
+        try:
+            if model_fname is None or not os.path.exists(model_fname):
+                model_fname = "%s/checkpoint.pth.tar" % self.save_path
+                with open(latest_fname, "w") as fout:
+                    fout.write(model_fname + "\n")
+            if self.is_root:
                 print("=> loading checkpoint '{}'".format(model_fname))
-                checkpoint = torch.load(model_fname, map_location="cpu")
-            except Exception:
-                self.write_log(
-                    "fail to load checkpoint from %s" % self.save_path, "valid"
-                )
-                return
+            checkpoint = torch.load(model_fname, map_location="cpu", weights_only=False)
+        except Exception:
+            self.write_log(
+                "fail to load checkpoint from %s" % self.save_path, "valid"
+            )
+            return
 
-            self.net.load_state_dict(checkpoint["state_dict"])
-            if "epoch" in checkpoint:
-                self.start_epoch = checkpoint["epoch"] + 1
-            if "best_acc" in checkpoint:
-                self.best_acc = checkpoint["best_acc"]
-            if "optimizer" in checkpoint:
-                self.optimizer.load_state_dict(checkpoint["optimizer"])
+        self.net.load_state_dict(checkpoint["state_dict"])
+        if "epoch" in checkpoint:
+            self.start_epoch = checkpoint["epoch"] + 1
+        if "best_acc" in checkpoint:
+            self.best_acc = checkpoint["best_acc"]
+        if "optimizer" in checkpoint:
+            self.optimizer.load_state_dict(checkpoint["optimizer"])
 
-            self.write_log("=> loaded checkpoint '{}'".format(model_fname), "valid")
+        self.write_log("=> loaded checkpoint '{}'".format(model_fname), "valid")
 
-    # noinspection PyArgumentList
     def broadcast(self):
-        import horovod.torch as hvd
+        if not dist.is_initialized():
+            return
+        # Sync epoch and best_acc from rank 0
+        state = [self.start_epoch, self.best_acc]
+        dist.broadcast_object_list(state, src=0)
+        self.start_epoch, self.best_acc = int(state[0]), float(state[1])
 
-        self.start_epoch = hvd.broadcast(
-            torch.LongTensor(1).fill_(self.start_epoch)[0], 0, name="start_epoch"
-        ).item()
-        self.best_acc = hvd.broadcast(
-            torch.Tensor(1).fill_(self.best_acc)[0], 0, name="best_acc"
-        ).item()
-        hvd.broadcast_parameters(self.net.state_dict(), 0)
-        hvd.broadcast_optimizer_state(self.optimizer, 0)
+        # Broadcast model parameters and buffers from rank 0
+        for param in self.net.parameters():
+            dist.broadcast(param.data, src=0)
+        for buf in self.net.buffers():
+            dist.broadcast(buf, src=0)
 
     """ metric related """
 
@@ -286,10 +300,8 @@ class DistributedRunManager:
             ) as t:
                 for i, (images, labels) in enumerate(data_loader):
                     images, labels = images.cuda(), labels.cuda()
-                    # compute output
                     output = net(images)
                     loss = self.test_criterion(output, labels)
-                    # measure accuracy and record loss
                     losses.update(loss, images.size(0))
                     self.update_metric(metric_dict, output, labels)
                     t.set_postfix(
@@ -327,10 +339,8 @@ class DistributedRunManager:
 
     def train_one_epoch(self, args, epoch, warmup_epochs=5, warmup_lr=0):
         self.net.train()
-        self.run_config.train_loader.sampler.set_epoch(
-            epoch
-        )  # required by distributed sampler
-        MyRandomResizedCrop.EPOCH = epoch  # required by elastic resolution
+        self.run_config.train_loader.sampler.set_epoch(epoch)
+        MyRandomResizedCrop.EPOCH = epoch
 
         nBatch = len(self.run_config.train_loader)
 
@@ -364,7 +374,6 @@ class DistributedRunManager:
                 images, labels = images.cuda(), labels.cuda()
                 target = labels
                 if isinstance(self.run_config.mixup_alpha, float):
-                    # transform data
                     random.seed(int("%d%.3d" % (i, epoch)))
                     lam = random.betavariate(
                         self.run_config.mixup_alpha, self.run_config.mixup_alpha
@@ -377,14 +386,12 @@ class DistributedRunManager:
                         self.run_config.label_smoothing,
                     )
 
-                # soft target
                 if args.teacher_model is not None:
                     args.teacher_model.train()
                     with torch.no_grad():
                         soft_logits = args.teacher_model(images).detach()
                         soft_label = F.softmax(soft_logits, dim=1)
 
-                # compute output
                 output = self.net(images)
 
                 if args.teacher_model is None:
@@ -402,12 +409,10 @@ class DistributedRunManager:
                     )
                     loss_type = "%.1fkd+ce" % args.kd_ratio
 
-                # update
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
-                # measure accuracy and record loss
                 losses.update(loss, images.size(0))
                 self.update_metric(metric_dict, output, target)
 
@@ -449,7 +454,7 @@ class DistributedRunManager:
                         list_mean(val_top5),
                         *self.get_metric_names(),
                         top1=train_top1,
-                        train_loss=train_loss
+                        train_loss=train_loss,
                     )
                 )
                 for i_s, v_a in zip(img_size, val_top1):

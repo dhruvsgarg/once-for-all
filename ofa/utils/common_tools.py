@@ -259,9 +259,7 @@ class MultiClassAverageMeter:
 
 
 class DistributedMetric(object):
-    """
-    Horovod: average metrics from distributed training.
-    """
+    """Average metrics across distributed workers using torch.distributed."""
 
     def __init__(self, name):
         self.name = name
@@ -269,10 +267,11 @@ class DistributedMetric(object):
         self.count = torch.zeros(1)[0]
 
     def update(self, val, delta_n=1):
-        import horovod.torch as hvd
-
-        val *= delta_n
-        self.sum += hvd.allreduce(val.detach().cpu(), name=self.name)
+        val = val.detach().clone() * delta_n
+        if torch.distributed.is_initialized():
+            torch.distributed.all_reduce(val)
+            val /= torch.distributed.get_world_size()
+        self.sum += val.cpu()
         self.count += delta_n
 
     @property
@@ -297,9 +296,9 @@ class DistributedTensor(object):
 
     @property
     def avg(self):
-        import horovod.torch as hvd
-
         if not self.synced:
-            self.sum = hvd.allreduce(self.sum, name=self.name)
+            if torch.distributed.is_initialized():
+                torch.distributed.all_reduce(self.sum)
+                self.sum /= torch.distributed.get_world_size()
             self.synced = True
         return self.sum / self.count

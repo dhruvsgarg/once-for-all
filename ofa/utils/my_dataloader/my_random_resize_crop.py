@@ -6,16 +6,17 @@ from PIL import Image
 
 import torchvision.transforms.functional as F
 import torchvision.transforms as transforms
+from torchvision.transforms import InterpolationMode
 
 __all__ = ["MyRandomResizedCrop", "MyResizeRandomCrop", "MyResize"]
 
-_pil_interpolation_to_str = {
-    Image.NEAREST: "PIL.Image.NEAREST",
-    Image.BILINEAR: "PIL.Image.BILINEAR",
-    Image.BICUBIC: "PIL.Image.BICUBIC",
-    Image.LANCZOS: "PIL.Image.LANCZOS",
-    Image.HAMMING: "PIL.Image.HAMMING",
-    Image.BOX: "PIL.Image.BOX",
+_interpolation_to_str = {
+    InterpolationMode.NEAREST: "InterpolationMode.NEAREST",
+    InterpolationMode.BILINEAR: "InterpolationMode.BILINEAR",
+    InterpolationMode.BICUBIC: "InterpolationMode.BICUBIC",
+    InterpolationMode.LANCZOS: "InterpolationMode.LANCZOS",
+    InterpolationMode.HAMMING: "InterpolationMode.HAMMING",
+    InterpolationMode.BOX: "InterpolationMode.BOX",
 }
 
 
@@ -35,7 +36,7 @@ class MyRandomResizedCrop(transforms.RandomResizedCrop):
         size,
         scale=(0.08, 1.0),
         ratio=(3.0 / 4.0, 4.0 / 3.0),
-        interpolation=Image.BILINEAR,
+        interpolation=InterpolationMode.BILINEAR,
     ):
         if not isinstance(size, int):
             size = size[0]
@@ -83,7 +84,7 @@ class MyRandomResizedCrop(transforms.RandomResizedCrop):
         )[0]
 
     def __repr__(self):
-        interpolate_str = _pil_interpolation_to_str[self.interpolation]
+        interpolate_str = _interpolation_to_str.get(self.interpolation, str(self.interpolation))
         format_string = self.__class__.__name__ + "(size={0}".format(
             MyRandomResizedCrop.IMAGE_SIZE_LIST
         )
@@ -98,7 +99,7 @@ class MyRandomResizedCrop(transforms.RandomResizedCrop):
 class MyResizeRandomCrop(object):
     def __init__(
         self,
-        interpolation=Image.BILINEAR,
+        interpolation=InterpolationMode.BILINEAR,
         use_padding=False,
         pad_if_needed=False,
         fill=0,
@@ -139,7 +140,7 @@ class MyResizeRandomCrop(object):
             % (
                 MyRandomResizedCrop.IMAGE_SIZE_LIST,
                 "@continuous" if MyRandomResizedCrop.CONTINUOUS else "",
-                _pil_interpolation_to_str[self.interpolation],
+                _interpolation_to_str.get(self.interpolation, str(self.interpolation)),
                 self.use_padding,
                 self.fill,
             )
@@ -147,7 +148,7 @@ class MyResizeRandomCrop(object):
 
 
 class MyResize(object):
-    def __init__(self, interpolation=Image.BILINEAR):
+    def __init__(self, interpolation=InterpolationMode.BILINEAR):
         self.interpolation = interpolation
 
     def __call__(self, img):
@@ -159,5 +160,5 @@ class MyResize(object):
         return "MyResize(size=%s%s, interpolation=%s)" % (
             MyRandomResizedCrop.IMAGE_SIZE_LIST,
             "@continuous" if MyRandomResizedCrop.CONTINUOUS else "",
-            _pil_interpolation_to_str[self.interpolation],
+            _interpolation_to_str.get(self.interpolation, str(self.interpolation)),
         )

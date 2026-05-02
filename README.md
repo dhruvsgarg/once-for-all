@@ -160,18 +160,100 @@ net, image_size = ofa_specialized(net_id, pretrained=True)
 | ofa-cpu-11 | cpu_lat@11ms_top1@72.0_finetune@25      | 72.0     | 90.4     | 4.4M   | 160M |
 | ofa-cpu-10 | cpu_lat@10ms_top1@71.1_finetune@25      | 71.1     | 89.9     | 4.2M   | 143M  |
 
-## How to train **OFA Networks**
+## Environment Setup (Python 3.12 + PyTorch 2.x)
+
 ```bash
-mpirun -np 32 -H <server1_ip>:8,<server2_ip>:8,<server3_ip>:8,<server4_ip>:8 \
-    -bind-to none -map-by slot \
-    -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x PATH \
-    python train_ofa_net.py
+conda create -n ofa python=3.12 -y
+conda activate ofa
+
+# Install PyTorch — match the versions used in your other codebase
+pip install torch==2.9.1 torchvision==0.24.1
+
+# Install remaining dependencies
+pip install filelock gdown tqdm pillow
+
+# Install this package in editable mode
+pip install -e .
 ```
-or 
+
+> **Note**: Horovod is no longer required. The codebase now uses
+> `torch.distributed` (NCCL) launched via `torchrun`.
+
+## How to train **OFA-ResNet50** supernet
+
+The ResNet50 supernet is trained with progressive shrinking in three stages:
+`expand → width → depth`. Each stage has two phases (phase 1 is a short
+warm-up, phase 2 is the full training run).
+
+### Prerequisites
+
+- ImageNet dataset with the standard `train/` and `val/` layout.
+- A pretrained ResNet50D checkpoint for the first expand phase (max expand
+  ratio 0.35, width multiplier 1.0, depth 2). You can use the released OFA
+  ResNet50 supernet weights as a starting point:
+  ```python
+  from ofa.model_zoo import ofa_net
+  net = ofa_net('ofa_resnet50', pretrained=True)
+  torch.save({'state_dict': net.state_dict()}, 'resnet50d_pretrained.pth.tar')
+  ```
+
+### Full pipeline — automated script (recommended)
+
+[run_ofa_resnet_training.sh](run_ofa_resnet_training.sh) runs all six phases
+in order, skips any phase whose `model_best.pth.tar` already exists, prints
+timing after each phase, and waits 20 s between phases.
+
 ```bash
-horovodrun -np 32 -H <server1_ip>:8,<server2_ip>:8,<server3_ip>:8,<server4_ip>:8 \
-    python train_ofa_net.py
+# 8 GPUs (default)
+bash run_ofa_resnet_training.sh \
+    --imagenet_path /path/to/imagenet
+
+# 4 GPUs, custom checkpoint root
+bash run_ofa_resnet_training.sh \
+    --imagenet_path /path/to/imagenet \
+    --nproc_per_node 4 \
+    --checkpoint_dir /coc/scratch/dgarg/ofa_checkpoints
+
+# Force re-run even if checkpoints already exist
+bash run_ofa_resnet_training.sh \
+    --imagenet_path /path/to/imagenet \
+    --force
 ```
+
+Checkpoints are written to `{checkpoint_dir}/{task}/phase{N}/checkpoint/`.
+`model_best.pth.tar` is automatically saved whenever validation top-1
+improves.  The script reads that file as the input for the next phase.
+
+### Running a single phase manually
+
+```bash
+torchrun --nproc_per_node=8 train_ofa_resnet.py \
+    --task expand --phase 1 \
+    --imagenet_path /path/to/imagenet \
+    --base_checkpoint_dir /coc/scratch/dgarg/ofa_checkpoints \
+    --ofa_checkpoint_path /coc/scratch/dgarg/ofa_checkpoints/resnet50d_pretrained.pth.tar
+```
+
+### Resuming an interrupted phase
+
+```bash
+torchrun --nproc_per_node=8 train_ofa_resnet.py \
+    --task expand --phase 1 --resume \
+    --imagenet_path /path/to/imagenet \
+    --base_checkpoint_dir /coc/scratch/dgarg/ofa_checkpoints
+```
+
+## How to train **OFA-MobileNetV3** supernet (original, Horovod replaced)
+
+The original `train_ofa_net.py` script has been updated to use `torchrun`
+instead of Horovod. Launch with:
+
+```bash
+torchrun --nproc_per_node=<N_GPUS> train_ofa_net.py
+```
+
+> **Legacy multi-node** (mpirun/horovodrun) commands from the original README
+> are no longer applicable with the updated codebase.
 
 ## Introduction Video
 
@@ -183,10 +265,12 @@ horovodrun -np 32 -H <server1_ip>:8,<server2_ip>:8,<server3_ip>:8,<server4_ip>:8
 
 
 ## Requirement
-* Python 3.6+
-* Pytorch 1.4.0+
-* ImageNet Dataset 
-* Horovod
+* Python 3.12+ (tested with 3.12.13)
+* PyTorch 2.9.1+, torchvision 0.24.1+
+* ImageNet Dataset
+* tqdm, filelock, gdown, pillow
+
+> **Horovod is no longer required.** Distributed training uses `torch.distributed` (NCCL) via `torchrun`.
 
 ## Related work on automated and efficient deep learning:
 [ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware](https://arxiv.org/pdf/1812.00332.pdf) (ICLR’19)
