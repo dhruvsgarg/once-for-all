@@ -5,18 +5,25 @@ functions to be run in multiprocessing. E.g., the data loading worker loop is
 in `./_utils/worker.py`.
 """
 
+import queue
 import threading
 import itertools
 import warnings
 import multiprocessing as python_multiprocessing
 import torch
 import torch.multiprocessing as multiprocessing
-from torch._utils import ExceptionWrapper
-from torch.multiprocessing import Queue as queue
-from torch._six import string_classes
 from torch.utils.data.dataset import IterableDataset
 from torch.utils.data import Sampler, SequentialSampler, RandomSampler, BatchSampler
 from torch.utils.data import _utils
+
+# torch._six was removed in PyTorch 2.0
+string_classes = (str,)
+
+# ExceptionWrapper moved between PyTorch versions
+try:
+    from torch._utils import ExceptionWrapper
+except ImportError:
+    from torch.utils.data._utils.worker import ExceptionWrapper
 
 from .my_data_worker import worker_loop
 

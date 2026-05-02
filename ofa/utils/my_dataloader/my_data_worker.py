@@ -4,18 +4,27 @@ These **needs** to be in global scope since Py2 doesn't support serializing
 static methods.
 """
 
+import queue
+import sys
 import torch
 import random
 import os
 from collections import namedtuple
-# from torch._six import queue
-from torch.multiprocessing import Queue as queue
-from torch._utils import ExceptionWrapper
-from torch.utils.data._utils import (
-    signal_handling,
-    MP_STATUS_CHECK_INTERVAL,
-    IS_WINDOWS,
-)
+from torch.utils.data._utils import signal_handling
+
+# ExceptionWrapper moved between PyTorch versions
+try:
+    from torch._utils import ExceptionWrapper
+except ImportError:
+    from torch.utils.data._utils.worker import ExceptionWrapper
+
+# MP_STATUS_CHECK_INTERVAL is still in _utils but guard against moves
+try:
+    from torch.utils.data._utils import MP_STATUS_CHECK_INTERVAL
+except ImportError:
+    MP_STATUS_CHECK_INTERVAL = 5.0
+
+IS_WINDOWS = sys.platform == "win32"
 
 from .my_random_resize_crop import MyRandomResizedCrop
 
