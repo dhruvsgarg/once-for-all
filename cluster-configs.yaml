@@ -1,0 +1,18 @@
+# Cluster configuration for OFA training.
+#
+# Each top-level key is a cluster name passed via --cluster <name>.
+# Values here become defaults; any explicit CLI flag still overrides them.
+#
+# master_addr is only needed for multi-node (--nnodes > 1) runs.
+# Set it to the IP address of the rank-0 node on that cluster.
+# Leave blank ("") for single-node runs (127.0.0.1 is used automatically).
+
+firefly:
+  imagenet_path:  /coc/data/datasets/ImageNet
+  checkpoint_dir: /coc/scratch/dgarg/ofa_checkpoints
+  master_addr:    "130.207.125.87"   # Jayne. rank-0 node IP
+
+sysml:
+  imagenet_path:  /home/dgarg39/datasets/ImageNet
+  checkpoint_dir: /home/dgarg39/ofa_checkpoints
+  master_addr:    "130.207.125.19"   # Sysml-05. rank-0 node IP

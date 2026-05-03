@@ -201,37 +201,101 @@ warm-up, phase 2 is the full training run).
 
 [run_ofa_resnet_training.sh](run_ofa_resnet_training.sh) runs all six phases
 in order, skips any phase whose `model_best.pth.tar` already exists, prints
-timing after each phase, and waits 20 s between phases.
+timing after each phase, and waits 20 s between phases.  It supports both
+single-node and multi-node runs via `torchrun`.
+
+#### Single-node
 
 ```bash
-# 8 GPUs (default)
+# 8 GPUs on the firefly cluster (reads paths from cluster-configs.yaml)
+bash run_ofa_resnet_training.sh --cluster firefly
+
+# 8 GPUs, paths provided manually
 bash run_ofa_resnet_training.sh \
-    --imagenet_path /path/to/imagenet
+    --imagenet_path /path/to/imagenet \
+    --checkpoint_dir /scratch/ofa_checkpoints
 
 # 4 GPUs, custom checkpoint root
 bash run_ofa_resnet_training.sh \
     --imagenet_path /path/to/imagenet \
     --nproc_per_node 4 \
-    --checkpoint_dir /coc/scratch/dgarg/ofa_checkpoints
+    --checkpoint_dir /scratch/ofa_checkpoints
 
 # Force re-run even if checkpoints already exist
-bash run_ofa_resnet_training.sh \
-    --imagenet_path /path/to/imagenet \
-    --force
+bash run_ofa_resnet_training.sh --cluster firefly --force
 ```
+
+#### Multi-node
+
+The script must be launched on **every node** with the same arguments, only
+`--node_rank` differs.  The rank-0 node is the master.
+
+```bash
+# Using a cluster preset (master_addr is read from cluster-configs.yaml):
+#   master node (rank 0):
+bash run_ofa_resnet_training.sh --cluster sysml \
+    --nnodes 2 --nproc_per_node 8 --node_rank 0
+#   worker node (rank 1):
+bash run_ofa_resnet_training.sh --cluster sysml \
+    --nnodes 2 --nproc_per_node 8 --node_rank 1
+
+# Fully manual (no cluster preset):
+#   master node:
+bash run_ofa_resnet_training.sh \
+    --imagenet_path /data/imagenet \
+    --checkpoint_dir /scratch/ofa_checkpoints \
+    --nnodes 2 --nproc_per_node 8 \
+    --master_addr 10.0.0.1 --node_rank 0
+#   worker node:
+bash run_ofa_resnet_training.sh \
+    --imagenet_path /data/imagenet \
+    --checkpoint_dir /scratch/ofa_checkpoints \
+    --nnodes 2 --nproc_per_node 8 \
+    --master_addr 10.0.0.1 --node_rank 1
+```
+
+> **Cluster presets**: `cluster-configs.yaml` in the repo root stores
+> per-cluster `imagenet_path`, `checkpoint_dir`, and `master_addr`.  Add your
+> own cluster entry there to avoid repeating long paths on the command line.
 
 Checkpoints are written to `{checkpoint_dir}/{task}/phase{N}/checkpoint/`.
 `model_best.pth.tar` is automatically saved whenever validation top-1
 improves.  The script reads that file as the input for the next phase.
+Interrupted phases resume automatically from the partial `checkpoint.pth.tar`
+if it exists.
 
 ### Running a single phase manually
 
+#### Single-node
 ```bash
 torchrun --nproc_per_node=8 train_ofa_resnet.py \
     --task expand --phase 1 \
     --imagenet_path /path/to/imagenet \
-    --base_checkpoint_dir /coc/scratch/dgarg/ofa_checkpoints \
-    --ofa_checkpoint_path /coc/scratch/dgarg/ofa_checkpoints/resnet50d_pretrained.pth.tar
+    --base_checkpoint_dir /scratch/ofa_checkpoints \
+    --ofa_checkpoint_path /scratch/ofa_checkpoints/resnet50d_pretrained.pth.tar
+```
+
+#### Multi-node (run on each node)
+```bash
+# master node (rank 0):
+torchrun \
+    --nproc_per_node=8 --nnodes=2 --node_rank=0 \
+    --master_addr=<rank0-ip> --master_port=29500 \
+    train_ofa_resnet.py \
+    --task expand --phase 1 \
+    --imagenet_path /path/to/imagenet \
+    --base_checkpoint_dir /scratch/ofa_checkpoints \
+    --ofa_checkpoint_path /scratch/ofa_checkpoints/resnet50d_pretrained.pth.tar
+
+# worker node (rank 1):
+torchrun \
+    --nproc_per_node=8 --nnodes=2 --node_rank=1 \
+    --master_addr=<rank0-ip> --master_port=29500 \
+    train_ofa_resnet.py \
+    --task expand --phase 1 \
+    --imagenet_path /path/to/imagenet \
+    --base_checkpoint_dir /scratch/ofa_checkpoints \
+    --ofa_checkpoint_path /scratch/ofa_checkpoints/resnet50d_pretrained.pth.tar
 ```
 
 ### Resuming an interrupted phase
@@ -240,16 +304,28 @@ torchrun --nproc_per_node=8 train_ofa_resnet.py \
 torchrun --nproc_per_node=8 train_ofa_resnet.py \
     --task expand --phase 1 --resume \
     --imagenet_path /path/to/imagenet \
-    --base_checkpoint_dir /coc/scratch/dgarg/ofa_checkpoints
+    --base_checkpoint_dir /scratch/ofa_checkpoints
 ```
 
-## How to train **OFA-MobileNetV3** supernet (original, Horovod replaced)
+The automated script handles `--resume` automatically when a partial
+checkpoint is found, so manual `--resume` is only needed for single-phase
+reruns.
+
+## How to train **OFA-MobileNetV3** / **CompOFA** supernet
 
 The original `train_ofa_net.py` script has been updated to use `torchrun`
-instead of Horovod. Launch with:
+instead of Horovod.  `run_compofa_training.sh` wraps it with the same
+cluster-preset and multi-node support as the ResNet script above.
 
 ```bash
-torchrun --nproc_per_node=<N_GPUS> train_ofa_net.py
+# Single-node
+torchrun --nproc_per_node=8 train_ofa_net.py
+
+# Multi-node via the orchestration script (see reference_multi_node_script.sh)
+bash run_compofa_training.sh --cluster sysml \
+    --nnodes 2 --nproc_per_node 8 --node_rank 0   # master
+bash run_compofa_training.sh --cluster sysml \
+    --nnodes 2 --nproc_per_node 8 --node_rank 1   # worker
 ```
 
 > **Legacy multi-node** (mpirun/horovodrun) commands from the original README
