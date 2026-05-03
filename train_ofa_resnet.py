@@ -252,7 +252,9 @@ if __name__ == "__main__":
         is_root=is_root,
     )
     run_manager.save_config()
-    run_manager.broadcast()
+    if args.resume:
+        run_manager.load_model()  # restores weights, optimizer state, and start_epoch from checkpoint.pth.tar
+    run_manager.broadcast()  # syncs start_epoch and weights from rank-0 to all workers
 
     # Training
     from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
