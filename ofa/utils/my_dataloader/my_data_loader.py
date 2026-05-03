@@ -815,6 +815,7 @@ class _MultiProcessingDataLoaderIter(_BaseDataLoaderIter):
                     self._data_queue,
                     torch.cuda.current_device(),
                     self._pin_memory_thread_done_event,
+                    "cuda",
                 ),
             )
             pin_memory_thread.daemon = True

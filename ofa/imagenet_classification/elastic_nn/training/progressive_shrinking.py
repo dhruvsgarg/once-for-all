@@ -161,7 +161,7 @@ def train_one_epoch(run_manager, args, epoch, warmup_epochs=0, warmup_lr=0):
             target = labels
 
             # soft target
-            if args.kd_ratio > 0:
+            if args.kd_ratio > 0 and args.teacher_model is not None:
                 args.teacher_model.train()
                 with torch.no_grad():
                     soft_logits = args.teacher_model(images).detach()
@@ -196,7 +196,7 @@ def train_one_epoch(run_manager, args, epoch, warmup_epochs=0, warmup_lr=0):
                 )
 
                 output = run_manager.net(images)
-                if args.kd_ratio == 0:
+                if args.kd_ratio == 0 or args.teacher_model is None:
                     loss = run_manager.train_criterion(output, labels)
                     loss_type = "ce"
                 else:
