@@ -306,15 +306,13 @@ def train_individual_subnets(args, run_config, is_root, num_gpus):
     full_net.cuda()
 
     # Load pretrained weights from the provided checkpoint.
-    # load_models() expects {"state_dict": ...} format.
+    # OFAResNets.load_state_dict() does its own key remapping (bn. → bn.bn.,
+    # conv.weight → conv.conv.weight, etc.) and returns None, so we cannot
+    # unpack (missing, unexpected) from it.
     ckpt = torch.load(args.ofa_checkpoint_path, map_location="cpu", weights_only=False)
     state_dict = ckpt.get("state_dict", ckpt)
-    missing, unexpected = full_net.load_state_dict(state_dict, strict=False)
+    full_net.load_state_dict(state_dict)
     if is_root:
-        if missing:
-            print(f"  [warn] Missing keys when loading supernet: {missing[:5]} ...")
-        if unexpected:
-            print(f"  [warn] Unexpected keys in checkpoint: {unexpected[:5]} ...")
         print(f"  Loaded supernet weights from {args.ofa_checkpoint_path}")
 
     # Broadcast loaded weights from rank 0 to all ranks.
