@@ -288,8 +288,8 @@ def train_individual_subnets(args, run_config, is_root, num_gpus):
             f"Subnet fine-tuning mode: {len(subnets_cfg)} subnets\n"
             f"Checkpoint : {args.ofa_checkpoint_path}\n"
             f"Epochs/subnet: {args.subnet_epochs}  |  "
-            f"LR: {args.subnet_lr} (×{num_gpus} GPUs = "
-            f"{args.subnet_lr * num_gpus:.4f})\n"
+            f"LR: {args.subnet_lr} x {num_gpus} GPUs = "
+            f"{args.subnet_lr * num_gpus:.4f}\n"
             f"{'='*70}"
         )
 
@@ -348,12 +348,12 @@ def train_individual_subnets(args, run_config, is_root, num_gpus):
 
         if is_root:
             print(
-                f"\n{'─'*70}\n"
+                f"\n{'-'*70}\n"
                 f"Subnet {subnet_id}  |  expected top-1: {expected_acc:.3f}%\n"
                 f"  depth     : {depth_values}\n"
                 f"  expand    : {elasticity_ratio}\n"
                 f"  width_idx : {width_multiplier}\n"
-                f"{'─'*70}"
+                f"{'-'*70}"
             )
 
         # Extract a fixed-architecture standalone subnet with the supernet's
