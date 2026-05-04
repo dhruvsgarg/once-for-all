@@ -1,0 +1,1954 @@
+{
+    "models": [
+        {
+            "id": 0,
+            "accuracy": 73.822,
+            "constraint_mflop": 0,
+            "filename": "ofa_resnet50_d=0+1+2_e=0.2+0.25+0.35_w=0.65+0.8+1.0.pt",
+            "loading_time_ns": -1,
+            "subnet_dimension": {
+                "depth_values": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "elasticity_ratio": [
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2
+                ],
+                "width_multiplier": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "predicted_accuracy": -1,
+            "predicted_mflops": -1,
+            "latency_and_batch_ns": [
+                {
+                    "batch_size": 1,
+                    "mean": 5109208.55,
+                    "std": 505273.49147955485,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 1154820.112,
+                            "std": 328310.931633672,
+                            "p99": 2065609.19,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 104402.922,
+                            "std": 8278.715705690807,
+                            "p99": 125572.49999999996,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 3826070.631,
+                            "std": 383982.90868394886,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15186.391,
+                            "std": 1212.0835824025214,
+                            "p99": 22100.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8728.494,
+                            "std": 594.0707348472924,
+                            "p99": 10531.899999999998,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 6943029.076598865
+                },
+                {
+                    "batch_size": 2,
+                    "mean": 6398038.873000001,
+                    "std": 549871.9228700838,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 2283090.328,
+                            "std": 480446.05849671556,
+                            "p99": 3489960.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 105468.88,
+                            "std": 7615.000257289458,
+                            "p99": 119280.09999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 3985351.1040000003,
+                            "std": 267339.11075970944,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15365.492,
+                            "std": 1224.6295699188058,
+                            "p99": 23492.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8763.069,
+                            "std": 1014.0747111326457,
+                            "p99": 12453.599999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 8252368.875627085
+                },
+                {
+                    "batch_size": 4,
+                    "mean": 8244794.2184999995,
+                    "std": 703983.2499702573,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 4556642.41,
+                            "std": 675627.2843171919,
+                            "p99": 6208921.79,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 114448.085,
+                            "std": 9474.642657602673,
+                            "p99": 130028.98999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 3548822.5184999993,
+                            "std": 197464.43264274384,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16067.038,
+                            "std": 6137.0249825295805,
+                            "p99": 23363.589999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8814.167,
+                            "std": 744.8736912570661,
+                            "p99": 10380.400000000001,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 10380819.558827022
+                },
+                {
+                    "batch_size": 8,
+                    "mean": 12767371.2095,
+                    "std": 887187.0834655993,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 8947062.182,
+                            "std": 851496.1782906207,
+                            "p99": 11016104.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 159596.014,
+                            "std": 3626.950153947973,
+                            "p99": 171401.80000000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 3635110.4624999994,
+                            "std": 249078.0368532735,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16706.941,
+                            "std": 1060.042438532765,
+                            "p99": 23361.599999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8895.61,
+                            "std": 1016.1321727474691,
+                            "p99": 10695.899999999994,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 15436029.966220714
+                },
+                {
+                    "batch_size": 16,
+                    "mean": 24482914.913,
+                    "std": 1222105.534823367,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 6265070.344,
+                            "std": 93779.66395423737,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 27695243.862357557
+                },
+                {
+                    "batch_size": 32,
+                    "mean": 29999684.631500002,
+                    "std": 1221766.7334638522,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 11781840.062500002,
+                            "std": 89256.02570355435,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 33201491.598286472
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "accuracy": 76.686,
+            "constraint_mflop": 1500,
+            "filename": "ofa_resnet50_d=0+1+2_e=0.2+0.25+0.35_w=0.65+0.8+1.0.pt",
+            "loading_time_ns": -1,
+            "subnet_dimension": {
+                "depth_values": [
+                    0,
+                    0,
+                    1,
+                    0,
+                    0
+                ],
+                "elasticity_ratio": [
+                    0.2,
+                    0.25,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.35,
+                    0.35,
+                    0.2,
+                    0.25,
+                    0.35,
+                    0.35
+                ],
+                "width_multiplier": [
+                    0,
+                    1,
+                    0,
+                    0,
+                    1,
+                    2
+                ]
+            },
+            "predicted_accuracy": 0.810768723487854,
+            "predicted_mflops": 1487.887936,
+            "latency_and_batch_ns": [
+                {
+                    "batch_size": 1,
+                    "mean": 5240954.447,
+                    "std": 444957.1660869888,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 1154820.112,
+                            "std": 328310.931633672,
+                            "p99": 2065609.19,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 104402.922,
+                            "std": 8278.715705690807,
+                            "p99": 125572.49999999996,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 3957816.528,
+                            "std": 300214.01136790763,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15186.391,
+                            "std": 1212.0835824025214,
+                            "p99": 22100.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8728.494,
+                            "std": 594.0707348472924,
+                            "p99": 10531.899999999998,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 6879928.518441754
+                },
+                {
+                    "batch_size": 2,
+                    "mean": 6242208.5084999995,
+                    "std": 509465.6029155353,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 2283090.328,
+                            "std": 480446.05849671556,
+                            "p99": 3489960.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 105468.88,
+                            "std": 7615.000257289458,
+                            "p99": 119280.09999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 3829520.7395,
+                            "std": 169311.16069249136,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15365.492,
+                            "std": 1224.6295699188058,
+                            "p99": 23492.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8763.069,
+                            "std": 1014.0747111326457,
+                            "p99": 12453.599999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 7868525.499270735
+                },
+                {
+                    "batch_size": 4,
+                    "mean": 8583251.3735,
+                    "std": 727655.9154430038,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 4556642.41,
+                            "std": 675627.2843171919,
+                            "p99": 6208921.79,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 114448.085,
+                            "std": 9474.642657602673,
+                            "p99": 130028.98999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 3887279.6735000005,
+                            "std": 269968.36333065183,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16067.038,
+                            "std": 6137.0249825295805,
+                            "p99": 23363.589999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8814.167,
+                            "std": 744.8736912570661,
+                            "p99": 10380.400000000001,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 10887920.856607096
+                },
+                {
+                    "batch_size": 8,
+                    "mean": 13506628.730500001,
+                    "std": 860659.7561250008,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 8947062.182,
+                            "std": 851496.1782906207,
+                            "p99": 11016104.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 159596.014,
+                            "std": 3626.950153947973,
+                            "p99": 171401.80000000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4374367.983500001,
+                            "std": 125196.49830418656,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16706.941,
+                            "std": 1060.042438532765,
+                            "p99": 23361.599999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8895.61,
+                            "std": 1016.1321727474691,
+                            "p99": 10695.899999999994,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 15887139.028555539
+                },
+                {
+                    "batch_size": 16,
+                    "mean": 25928346.163,
+                    "std": 1223294.5565669138,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 7710501.594,
+                            "std": 108176.98115451468,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 29174163.272165403
+                },
+                {
+                    "batch_size": 32,
+                    "mean": 32560201.7635,
+                    "std": 1221757.5177085442,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 14342357.194500001,
+                            "std": 89129.78852665176,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 35761715.102612995
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "accuracy": 77.636,
+            "constraint_mflop": 1800,
+            "filename": "ofa_resnet50_d=0+1+2_e=0.2+0.25+0.35_w=0.65+0.8+1.0.pt",
+            "loading_time_ns": -1,
+            "subnet_dimension": {
+                "depth_values": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    0
+                ],
+                "elasticity_ratio": [
+                    0.2,
+                    0.2,
+                    0.25,
+                    0.35,
+                    0.2,
+                    0.25,
+                    0.2,
+                    0.25,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.25,
+                    0.2,
+                    0.35,
+                    0.25,
+                    0.25,
+                    0.2,
+                    0.25
+                ],
+                "width_multiplier": [
+                    0,
+                    1,
+                    1,
+                    0,
+                    1,
+                    2
+                ]
+            },
+            "predicted_accuracy": 0.8178844451904297,
+            "predicted_mflops": 1799.703552,
+            "latency_and_batch_ns": [
+                {
+                    "batch_size": 1,
+                    "mean": 5474907.9305,
+                    "std": 424889.6212464672,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 1154820.112,
+                            "std": 328310.931633672,
+                            "p99": 2065609.19,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 104402.922,
+                            "std": 8278.715705690807,
+                            "p99": 125572.49999999996,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4191770.0115,
+                            "std": 269578.8626958953,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15186.391,
+                            "std": 1212.0835824025214,
+                            "p99": 22100.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8728.494,
+                            "std": 594.0707348472924,
+                            "p99": 10531.899999999998,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 7042624.646130654
+                },
+                {
+                    "batch_size": 2,
+                    "mean": 6548340.556000001,
+                    "std": 543197.0054006288,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 2283090.328,
+                            "std": 480446.05849671556,
+                            "p99": 3489960.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 105468.88,
+                            "std": 7615.000257289458,
+                            "p99": 119280.09999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4135652.7870000005,
+                            "std": 253325.98614662403,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15365.492,
+                            "std": 1224.6295699188058,
+                            "p99": 23492.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8763.069,
+                            "std": 1014.0747111326457,
+                            "p99": 12453.599999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 8370076.030777048
+                },
+                {
+                    "batch_size": 4,
+                    "mean": 8855992.6755,
+                    "std": 728406.3528064654,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 4556642.41,
+                            "std": 675627.2843171919,
+                            "p99": 6208921.79,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 114448.085,
+                            "std": 9474.642657602673,
+                            "p99": 130028.98999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4160020.9754999997,
+                            "std": 271984.5597254591,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16067.038,
+                            "std": 6137.0249825295805,
+                            "p99": 23363.589999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8814.167,
+                            "std": 744.8736912570661,
+                            "p99": 10380.400000000001,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 11165351.831421418
+                },
+                {
+                    "batch_size": 8,
+                    "mean": 14067047.256499998,
+                    "std": 864314.9819049017,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 8947062.182,
+                            "std": 851496.1782906207,
+                            "p99": 11016104.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 159596.014,
+                            "std": 3626.950153947973,
+                            "p99": 171401.80000000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4934786.5095,
+                            "std": 148254.2927532111,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16706.941,
+                            "std": 1060.042438532765,
+                            "p99": 23361.599999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8895.61,
+                            "std": 1016.1321727474691,
+                            "p99": 10695.899999999994,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 16501189.98444397
+                },
+                {
+                    "batch_size": 16,
+                    "mean": 26890831.577,
+                    "std": 1223461.2011815356,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 8672987.008000001,
+                            "std": 110045.43571647129,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 30140994.711476516
+                },
+                {
+                    "batch_size": 32,
+                    "mean": 34366199.219000004,
+                    "std": 1221100.6926753342,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 16148354.65,
+                            "std": 79621.53463506326,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 37545596.35956116
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "accuracy": 78.25,
+            "constraint_mflop": 2000,
+            "filename": "ofa_resnet50_d=0+1+2_e=0.2+0.25+0.35_w=0.65+0.8+1.0.pt",
+            "loading_time_ns": -1,
+            "subnet_dimension": {
+                "depth_values": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    2
+                ],
+                "elasticity_ratio": [
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.35,
+                    0.2,
+                    0.2,
+                    0.25,
+                    0.25,
+                    0.2,
+                    0.2,
+                    0.25,
+                    0.35,
+                    0.25,
+                    0.2
+                ],
+                "width_multiplier": [
+                    0,
+                    2,
+                    0,
+                    0,
+                    1,
+                    1
+                ]
+            },
+            "predicted_accuracy": 0.8212876319885254,
+            "predicted_mflops": 1987.505728,
+            "latency_and_batch_ns": [
+                {
+                    "batch_size": 1,
+                    "mean": 5879129.346,
+                    "std": 385432.26712960954,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 1154820.112,
+                            "std": 328310.931633672,
+                            "p99": 2065609.19,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 104402.922,
+                            "std": 8278.715705690807,
+                            "p99": 125572.49999999996,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4595991.427,
+                            "std": 201741.43231898764,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15186.391,
+                            "std": 1212.0835824025214,
+                            "p99": 22100.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8728.494,
+                            "std": 594.0707348472924,
+                            "p99": 10531.899999999998,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 7289056.1985739665
+                },
+                {
+                    "batch_size": 2,
+                    "mean": 6917403.758,
+                    "std": 494694.4360069821,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 2283090.328,
+                            "std": 480446.05849671556,
+                            "p99": 3489960.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 105468.88,
+                            "std": 7615.000257289458,
+                            "p99": 119280.09999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4504715.989,
+                            "std": 117616.55324491917,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15365.492,
+                            "std": 1224.6295699188058,
+                            "p99": 23492.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8763.069,
+                            "std": 1014.0747111326457,
+                            "p99": 12453.599999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 8423479.091847682
+                },
+                {
+                    "batch_size": 4,
+                    "mean": 9292618.635,
+                    "std": 719792.0861606445,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 4556642.41,
+                            "std": 675627.2843171919,
+                            "p99": 6208921.79,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 114448.085,
+                            "std": 9474.642657602673,
+                            "p99": 130028.98999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4596646.935,
+                            "std": 247992.8088064809,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16067.038,
+                            "std": 6137.0249825295805,
+                            "p99": 23363.589999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8814.167,
+                            "std": 744.8736912570661,
+                            "p99": 10380.400000000001,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 11546172.978283875
+                },
+                {
+                    "batch_size": 8,
+                    "mean": 14439549.018,
+                    "std": 861362.0678164654,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 8947062.182,
+                            "std": 851496.1782906207,
+                            "p99": 11016104.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 159596.014,
+                            "std": 3626.950153947973,
+                            "p99": 171401.80000000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 5307288.270999999,
+                            "std": 129936.75095038164,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16706.941,
+                            "std": 1060.042438532765,
+                            "p99": 23361.599999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8895.61,
+                            "std": 1016.1321727474691,
+                            "p99": 10695.899999999994,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 16831085.143710587
+                },
+                {
+                    "batch_size": 16,
+                    "mean": 27281200.705,
+                    "std": 1225034.8359066544,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 9063356.136,
+                            "std": 126344.91010842298,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 30569276.416912194
+                },
+                {
+                    "batch_size": 32,
+                    "mean": 35004515.9265,
+                    "std": 1220841.464433172,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 16786671.3575,
+                            "std": 75541.83215142418,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 38174423.67908422
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "accuracy": 79.44,
+            "constraint_mflop": 4000,
+            "filename": "ofa_resnet50_d=0+1+2_e=0.2+0.25+0.35_w=0.65+0.8+1.0.pt",
+            "loading_time_ns": -1,
+            "subnet_dimension": {
+                "depth_values": [
+                    0,
+                    2,
+                    2,
+                    2,
+                    2
+                ],
+                "elasticity_ratio": [
+                    0.2,
+                    0.25,
+                    0.35,
+                    0.35,
+                    0.2,
+                    0.35,
+                    0.25,
+                    0.25,
+                    0.2,
+                    0.25,
+                    0.25,
+                    0.35,
+                    0.2,
+                    0.35,
+                    0.25,
+                    0.35,
+                    0.2,
+                    0.35
+                ],
+                "width_multiplier": [
+                    1,
+                    2,
+                    0,
+                    0,
+                    2,
+                    2
+                ]
+            },
+            "predicted_accuracy": 0.8298700451850891,
+            "predicted_mflops": 3999.52288,
+            "latency_and_batch_ns": [
+                {
+                    "batch_size": 1,
+                    "mean": 6625614.2584999995,
+                    "std": 407167.96982344677,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 1154820.112,
+                            "std": 328310.931633672,
+                            "p99": 2065609.19,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 104402.922,
+                            "std": 8278.715705690807,
+                            "p99": 125572.49999999996,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 5342476.3395,
+                            "std": 240680.96854465504,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15186.391,
+                            "std": 1212.0835824025214,
+                            "p99": 22100.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8728.494,
+                            "std": 594.0707348472924,
+                            "p99": 10531.899999999998,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 8126114.472334868
+                },
+                {
+                    "batch_size": 2,
+                    "mean": 8116326.694999999,
+                    "std": 608691.4625724462,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 2283090.328,
+                            "std": 480446.05849671556,
+                            "p99": 3489960.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 105468.88,
+                            "std": 7615.000257289458,
+                            "p99": 119280.09999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 5703638.926,
+                            "std": 373652.7334163802,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15365.492,
+                            "std": 1224.6295699188058,
+                            "p99": 23492.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8763.069,
+                            "std": 1014.0747111326457,
+                            "p99": 12453.599999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 10217942.1839265
+                },
+                {
+                    "batch_size": 4,
+                    "mean": 11026348.1945,
+                    "std": 730599.7035435629,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 4556642.41,
+                            "std": 675627.2843171919,
+                            "p99": 6208921.79,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 114448.085,
+                            "std": 9474.642657602673,
+                            "p99": 130028.98999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 6330376.494499999,
+                            "std": 277805.1704669604,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16067.038,
+                            "std": 6137.0249825295805,
+                            "p99": 23363.589999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8814.167,
+                            "std": 744.8736912570661,
+                            "p99": 10380.400000000001,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 13349246.09100615
+                },
+                {
+                    "batch_size": 8,
+                    "mean": 17359175.2155,
+                    "std": 864902.0616998838,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 8947062.182,
+                            "std": 851496.1782906207,
+                            "p99": 11016104.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 159596.014,
+                            "std": 3626.950153947973,
+                            "p99": 171401.80000000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 8226914.4685,
+                            "std": 151639.45300347786,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16706.941,
+                            "std": 1060.042438532765,
+                            "p99": 23361.599999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8895.61,
+                            "std": 1016.1321727474691,
+                            "p99": 10695.899999999994,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 19801191.82618609
+                },
+                {
+                    "batch_size": 16,
+                    "mean": 31946177.7355,
+                    "std": 1225329.8486474047,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 13728333.166500002,
+                            "std": 129174.01097641028,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 35240833.93603114
+                },
+                {
+                    "batch_size": 32,
+                    "mean": 43395417.5205,
+                    "std": 1221671.039730459,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 25177572.9515,
+                            "std": 87936.43409624079,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 46594155.11720786
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "accuracy": 80.158,
+            "constraint_mflop": 99999999,
+            "filename": "ofa_resnet50_d=0+1+2_e=0.2+0.25+0.35_w=0.65+0.8+1.0.pt",
+            "loading_time_ns": -1,
+            "subnet_dimension": {
+                "depth_values": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+                ],
+                "elasticity_ratio": [
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35
+                ],
+                "width_multiplier": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+                ]
+            },
+            "predicted_accuracy": -1,
+            "predicted_mflops": -1,
+            "latency_and_batch_ns": [
+                {
+                    "batch_size": 1,
+                    "mean": 6143388.296999999,
+                    "std": 364748.78708134056,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 1154820.112,
+                            "std": 328310.931633672,
+                            "p99": 2065609.19,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 104402.922,
+                            "std": 8278.715705690807,
+                            "p99": 125572.49999999996,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 4860250.378,
+                            "std": 158692.3143909468,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15186.391,
+                            "std": 1212.0835824025214,
+                            "p99": 22100.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8728.494,
+                            "std": 594.0707348472924,
+                            "p99": 10531.899999999998,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 7453182.901273343
+                },
+                {
+                    "batch_size": 2,
+                    "mean": 7627697.844500001,
+                    "std": 572281.188971225,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 2283090.328,
+                            "std": 480446.05849671556,
+                            "p99": 3489960.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 105468.88,
+                            "std": 7615.000257289458,
+                            "p99": 119280.09999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 5215010.0755,
+                            "std": 310832.4755093454,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 15365.492,
+                            "std": 1224.6295699188058,
+                            "p99": 23492.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8763.069,
+                            "std": 1014.0747111326457,
+                            "p99": 12453.599999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 9583193.413534738
+                },
+                {
+                    "batch_size": 4,
+                    "mean": 12729851.531,
+                    "std": 682612.6554197773,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 4556642.41,
+                            "std": 675627.2843171919,
+                            "p99": 6208921.79,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 114448.085,
+                            "std": 9474.642657602673,
+                            "p99": 130028.98999999999,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 8033879.830999999,
+                            "std": 96746.17956009677,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16067.038,
+                            "std": 6137.0249825295805,
+                            "p99": 23363.589999999997,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8814.167,
+                            "std": 744.8736912570661,
+                            "p99": 10380.400000000001,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 14631606.214656785
+                },
+                {
+                    "batch_size": 8,
+                    "mean": 21325895.9115,
+                    "std": 859211.8270397248,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 8947062.182,
+                            "std": 851496.1782906207,
+                            "p99": 11016104.69,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 159596.014,
+                            "std": 3626.950153947973,
+                            "p99": 171401.80000000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 12193635.164499998,
+                            "std": 114821.21362982709,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 16706.941,
+                            "std": 1060.042438532765,
+                            "p99": 23361.599999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8895.61,
+                            "std": 1016.1321727474691,
+                            "p99": 10695.899999999994,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 23682273.297402978
+                },
+                {
+                    "batch_size": 16,
+                    "mean": 38381315.808000006,
+                    "std": 1223190.7831662528,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 20163471.239,
+                            "std": 106997.09878465315,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 41624388.51077311
+                },
+                {
+                    "batch_size": 32,
+                    "mean": 54699164.35750001,
+                    "std": 1220463.437415568,
+                    "stages": {
+                        "deserialize": {
+                            "mean": 17899553.75,
+                            "std": 1218438.322445308,
+                            "p99": 20876208.810000002,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json"
+                        },
+                        "h2d_copy": {
+                            "mean": 291191.299,
+                            "std": 12240.432680170943,
+                            "p99": 301766.61,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json"
+                        },
+                        "forward": {
+                            "mean": 36481319.7885,
+                            "std": 69164.21902751124,
+                            "profiled": true,
+                            "source": "legacy_forward_only",
+                            "note": "Migrated from legacy pareto; value equals the pre-augmentation forward latency.",
+                            "includes_cuda_synchronize": true
+                        },
+                        "postprocess": {
+                            "mean": 18246.204,
+                            "std": 2285.313462964765,
+                            "p99": 23611.09,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        },
+                        "d2h_copy": {
+                            "mean": 8853.316,
+                            "std": 562.5134483045925,
+                            "p99": 10455.509999999995,
+                            "profiled": true,
+                            "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json"
+                        }
+                    },
+                    "p99": 57854237.781958
+                }
+            ]
+        }
+    ],
+    "_stage_profile_metadata": {
+        "schema_version": "2.0",
+        "summation_rule": "mean = sum(stage.mean); std = sqrt(sum(stage.std^2))  # assumes stage independence",
+        "hardware": {
+            "gpu": "NVIDIA A40 48GB",
+            "cpu": "AMD EPYC 7513 32-Core",
+            "host": "jayne.cc.gatech.edu",
+            "cluster": "firefly",
+            "cuda_version": "12.8",
+            "torch_version": "2.9.1+cu128",
+            "opencv_version": "4.13.0"
+        },
+        "description": "Migrated from latency_curves/latency_curves_supernet_resnet_A40_with_decode_17Apr26.json on jayne A40 18Apr26. Decode peeled using 17Apr26 profile; re-augment with 18Apr26 stage profiles next.",
+        "migrated_from": "latency_curves/latency_curves_supernet_resnet_A40_with_decode_17Apr26.json",
+        "migrated_by": "scripts/migrate_pareto_to_staged.py v1",
+        "stage_profiles_applied": [
+            {
+                "stage": "deserialize",
+                "source": "latency_curves/jpeg_decode_profile_A40_jayne_18Apr26.json",
+                "sha256": "4a3b8812a0d3d686f5b47ffbee0b6c452c550c6ddc01c44ea599f73ad54b2254",
+                "applied_at": "2026-04-18T16:24:30.054230+00:00"
+            },
+            {
+                "stage": "h2d_copy",
+                "source": "latency_curves/h2d_copy_profile_image_A40_jayne_18Apr26.json",
+                "sha256": "562b3bc6dc1163569a3e6d4cdd9194f357baabb4f829d918228c5ba1ec888ae4",
+                "applied_at": "2026-04-18T16:24:30.054230+00:00"
+            },
+            {
+                "stage": "postprocess",
+                "source": "/home/dgarg39/superserve/latency_curves/expts_apr26/image/postprocess_profile_image_A40_23apr26.json",
+                "sha256": "c0c7719921234a3405eda56e14268a968858615c2b69e7d9221ad0f91770655d",
+                "applied_at": "2026-04-23T16:02:53.747232+00:00"
+            },
+            {
+                "stage": "d2h_copy",
+                "source": "/home/dgarg39/superserve/latency_curves/expts_apr26/image/postprocess_profile_image_A40_23apr26.json",
+                "sha256": "c0c7719921234a3405eda56e14268a968858615c2b69e7d9221ad0f91770655d",
+                "applied_at": "2026-04-23T16:02:53.747232+00:00"
+            },
+            {
+                "stage": "h2d_copy",
+                "source": "/home/dgarg39/superserve/latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_23apr26.json",
+                "sha256": "88311f77eba1dd9d488619a64858c78c865197db0e3ec70ad40ef3827ed4da80",
+                "applied_at": "2026-04-23T16:02:53.747232+00:00"
+            },
+            {
+                "stage": "deserialize",
+                "source": "/home/dgarg39/superserve/latency_curves/expts_apr26/image/jpeg_decode_profile_A40_23apr26.json",
+                "sha256": "e8df5be6d74bff3bcbae41982be54292cb8277222925549d4b71861be9997080",
+                "applied_at": "2026-04-23T16:02:53.747232+00:00"
+            },
+            {
+                "stage": "deserialize",
+                "source": "latency_curves/expts_apr26/image/jpeg_decode_profile_A40_29apr26.json",
+                "sha256": "d960106b0eee9af36df21bca4bb46fff69ecdb7d05c406ec424f59e184b24614",
+                "applied_at": "2026-04-29T20:52:32.069657+00:00"
+            },
+            {
+                "stage": "h2d_copy",
+                "source": "latency_curves/expts_apr26/image/h2d_copy_profile_image_A40_29apr26.json",
+                "sha256": "c27a733c9f3f6ee3fba67d70b641cff78db1557a01f577c296e5f5ab52722163",
+                "applied_at": "2026-04-29T20:52:32.069657+00:00"
+            },
+            {
+                "stage": "postprocess",
+                "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json",
+                "sha256": "15f7aaaaa5b867e43b8425bcc2439ba93bb813d7edbf74cc97c3acc00783c030",
+                "applied_at": "2026-04-29T20:52:32.069657+00:00"
+            },
+            {
+                "stage": "d2h_copy",
+                "source": "latency_curves/expts_apr26/image/postprocess_profile_image_A40_29apr26.json",
+                "sha256": "15f7aaaaa5b867e43b8425bcc2439ba93bb813d7edbf74cc97c3acc00783c030",
+                "applied_at": "2026-04-29T20:52:32.069657+00:00"
+            }
+        ]
+    }
+}

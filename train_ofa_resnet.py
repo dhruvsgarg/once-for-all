@@ -6,8 +6,20 @@
 # Launch with torchrun:
 #   Single-GPU:   python train_ofa_resnet.py --task expand --phase 1
 #   Multi-GPU:    torchrun --nproc_per_node=8 train_ofa_resnet.py --task expand --phase 1
+#
+# Individual subnet fine-tuning (6 specific subnets from a JSON config):
+#   --ofa_checkpoint_path is the INPUT base ResNet50D checkpoint (read-only).
+#   --subnet_out_dir is where each fine-tuned subnet is written (default:
+#     /coc/scratch/dgarg/finetuned_subnets, separate from OFA stage dirs).
+#
+#   python train_ofa_resnet.py --train_subnets \
+#       --subnet_config_json latency_curves_supernet_resnet_A40_with_stages_29apr26.json \
+#       --ofa_checkpoint_path /coc/scratch/dgarg/resnet50d_base.pth.tar \
+#       --subnet_out_dir /coc/scratch/dgarg/finetuned_subnets \
+#       --subnet_epochs 30 --subnet_lr 2.5e-3
 
 import argparse
+import json
 import numpy as np
 import os
 import random
@@ -23,7 +35,7 @@ from ofa.imagenet_classification.run_manager import DistributedImageNetRunConfig
 from ofa.imagenet_classification.run_manager.distributed_run_manager import (
     DistributedRunManager,
 )
-from ofa.utils import MyRandomResizedCrop
+from ofa.utils import MyRandomResizedCrop, list_mean
 from ofa.imagenet_classification.elastic_nn.training.progressive_shrinking import (
     load_models,
 )
@@ -55,9 +67,11 @@ parser.add_argument(
     type=str,
     default=None,
     help=(
-        "Checkpoint to load at the start of this stage. "
-        "Provide a pretrained ResNet50D checkpoint for the first expand phase, "
-        "or the previous stage checkpoint for later phases."
+        "INPUT checkpoint to load weights from (never written to). "
+        "For --train_subnets: path to the pretrained ResNet50D base checkpoint "
+        "(.pth.tar with a 'state_dict' key). "
+        "For progressive shrinking: path to the completed checkpoint from the "
+        "previous stage (expand → width → depth)."
     ),
 )
 parser.add_argument("--kd_ratio", type=float, default=1.0)
@@ -70,6 +84,54 @@ parser.add_argument(
     help="Root directory for all checkpoint subdirectories.",
 )
 
+# ---------------------------------------------------------------------------
+# Subnet-training flags
+# ---------------------------------------------------------------------------
+parser.add_argument(
+    "--train_subnets",
+    action="store_true",
+    help=(
+        "Instead of full progressive-shrinking supernet training, fine-tune "
+        "each specific subnet defined in --subnet_config_json. "
+        "Requires --ofa_checkpoint_path (pretrained OFA supernet or ResNet50D "
+        "checkpoint) and --subnet_config_json."
+    ),
+)
+parser.add_argument(
+    "--subnet_config_json",
+    type=str,
+    default=None,
+    help=(
+        "Path to JSON file containing the 6 subnet configurations to train. "
+        "Each entry must have subnet_dimension.depth_values, "
+        "subnet_dimension.elasticity_ratio, subnet_dimension.width_multiplier, "
+        "and accuracy (expected top-1 %%). Required when --train_subnets is set."
+    ),
+)
+parser.add_argument(
+    "--subnet_out_dir",
+    type=str,
+    default=None,
+    help=(
+        "Output root for subnet fine-tuning checkpoints. "
+        "Each subnet is saved under <subnet_out_dir>/subnet_<id>/. "
+        "Defaults to /coc/scratch/dgarg/finetuned_subnets so it stays "
+        "separate from the OFA progressive-shrinking stage directories."
+    ),
+)
+parser.add_argument(
+    "--subnet_epochs",
+    type=int,
+    default=30,
+    help="Fine-tuning epochs per subnet when --train_subnets is set.",
+)
+parser.add_argument(
+    "--subnet_lr",
+    type=float,
+    default=2.5e-3,
+    help="Base learning rate per GPU for subnet fine-tuning.",
+)
+
 args = parser.parse_args()
 
 # ---------------------------------------------------------------------------
@@ -79,7 +141,23 @@ args = parser.parse_args()
 #   expand_list = [0.2, 0.25, 0.35]
 #   width_list  = [0.65, 0.8, 1.0]
 # ---------------------------------------------------------------------------
-if args.task == "expand":
+if args.train_subnets:
+    # Subnet training bypasses the progressive-shrinking stage setup.
+    # We set stubs so downstream code that unconditionally reads these attributes
+    # (e.g. image-size parsing) still finds valid values.
+    if args.subnet_out_dir is None:
+        args.subnet_out_dir = "/coc/scratch/dgarg/finetuned_subnets"
+    args.path = args.subnet_out_dir  # used only for os.makedirs in __main__
+    args.dynamic_batch_size = 1
+    args.n_epochs = args.subnet_epochs
+    args.base_lr = args.subnet_lr
+    args.warmup_epochs = 0
+    args.warmup_lr = args.subnet_lr
+    args.expand_list = "0.2,0.25,0.35"
+    args.depth_list = "0,1,2"
+    args.width_mult_list = "0.65,0.8,1.0"
+
+elif args.task == "expand":
     # Stage 1: add elastic expand-ratio (depth and width are at max)
     args.path = os.path.join(args.base_checkpoint_dir, "expand", "phase%d" % args.phase)
     args.dynamic_batch_size = 4
@@ -172,6 +250,195 @@ args.teacher_model = None  # ResNet50 uses no KD teacher by default
 
 
 # ---------------------------------------------------------------------------
+# Subnet fine-tuning
+# ---------------------------------------------------------------------------
+
+def train_individual_subnets(args, run_config, is_root, num_gpus):
+    """
+    Fine-tune each subnet from args.subnet_config_json.
+
+    Weights are initialised from the OFA supernet checkpoint at
+    args.ofa_checkpoint_path, then the fixed-architecture subnet is
+    extracted and fine-tuned as a standalone model.  Each subnet is
+    saved independently so it can be loaded directly at serving time
+    without any OFA infrastructure.
+
+    Expected accuracy numbers come from the JSON file and are printed
+    alongside achieved accuracy at the end so you can verify the
+    training was successful before deploying.
+    """
+    if args.subnet_config_json is None:
+        raise ValueError(
+            "--subnet_config_json is required when --train_subnets is set."
+        )
+    if args.ofa_checkpoint_path is None:
+        raise ValueError(
+            "--ofa_checkpoint_path is required when --train_subnets is set. "
+            "Provide a pretrained OFA supernet checkpoint (or a ResNet50D "
+            "checkpoint that covers the full design space)."
+        )
+
+    with open(args.subnet_config_json) as f:
+        config_data = json.load(f)
+    subnets_cfg = config_data["models"]
+
+    if is_root:
+        print(
+            f"\n{'='*70}\n"
+            f"Subnet fine-tuning mode: {len(subnets_cfg)} subnets\n"
+            f"Checkpoint : {args.ofa_checkpoint_path}\n"
+            f"Epochs/subnet: {args.subnet_epochs}  |  "
+            f"LR: {args.subnet_lr} (×{num_gpus} GPUs = "
+            f"{args.subnet_lr * num_gpus:.4f})\n"
+            f"{'='*70}"
+        )
+
+    # Build OFA supernet with the full design space so we can extract any
+    # of the 6 subnets regardless of which config they came from.
+    full_net = OFAResNets(
+        n_classes=run_config.data_provider.n_classes,
+        bn_param=(args.bn_momentum, args.bn_eps),
+        dropout_rate=args.dropout,
+        depth_list=[0, 1, 2],
+        expand_ratio_list=[0.2, 0.25, 0.35],
+        width_mult_list=[0.65, 0.8, 1.0],
+    )
+    full_net.cuda()
+
+    # Load pretrained weights from the provided checkpoint.
+    # load_models() expects {"state_dict": ...} format.
+    ckpt = torch.load(args.ofa_checkpoint_path, map_location="cpu", weights_only=False)
+    state_dict = ckpt.get("state_dict", ckpt)
+    missing, unexpected = full_net.load_state_dict(state_dict, strict=False)
+    if is_root:
+        if missing:
+            print(f"  [warn] Missing keys when loading supernet: {missing[:5]} ...")
+        if unexpected:
+            print(f"  [warn] Unexpected keys in checkpoint: {unexpected[:5]} ...")
+        print(f"  Loaded supernet weights from {args.ofa_checkpoint_path}")
+
+    # Broadcast loaded weights from rank 0 to all ranks.
+    if dist.is_initialized():
+        for param in full_net.parameters():
+            dist.broadcast(param.data, src=0)
+        for buf in full_net.buffers():
+            dist.broadcast(buf, src=0)
+
+    # Subnet-specific training args (shared across all subnets).
+    subnet_args = argparse.Namespace(**vars(args))
+    subnet_args.n_epochs = args.subnet_epochs
+    subnet_args.base_lr = args.subnet_lr
+    subnet_args.warmup_epochs = 0
+    subnet_args.warmup_lr = args.subnet_lr
+    subnet_args.teacher_model = None
+    subnet_args.kd_ratio = 0.0
+
+    # Patch run_config so DistributedRunManager's LR scheduler uses the
+    # right epoch count and initial LR.
+    run_config.n_epochs = args.subnet_epochs
+    run_config.init_lr = args.subnet_lr * num_gpus
+
+    results = []
+
+    for subnet_info in subnets_cfg:
+        subnet_id = subnet_info["id"]
+        expected_acc = subnet_info["accuracy"]
+        dim = subnet_info["subnet_dimension"]
+        depth_values = dim["depth_values"]
+        elasticity_ratio = dim["elasticity_ratio"]
+        width_multiplier = dim["width_multiplier"]
+
+        if is_root:
+            print(
+                f"\n{'─'*70}\n"
+                f"Subnet {subnet_id}  |  expected top-1: {expected_acc:.3f}%\n"
+                f"  depth     : {depth_values}\n"
+                f"  expand    : {elasticity_ratio}\n"
+                f"  width_idx : {width_multiplier}\n"
+                f"{'─'*70}"
+            )
+
+        # Extract a fixed-architecture standalone subnet with the supernet's
+        # pretrained weights copied in (preserve_weight=True).
+        full_net.set_active_subnet(
+            d=depth_values, e=elasticity_ratio, w=width_multiplier
+        )
+        subnet = full_net.get_active_subnet(preserve_weight=True)
+        subnet.cuda()
+
+        # Sync the extracted subnet weights across all ranks (rank-0 did the
+        # extraction and weight copy; other ranks need the same weights).
+        if dist.is_initialized():
+            for param in subnet.parameters():
+                dist.broadcast(param.data, src=0)
+            for buf in subnet.buffers():
+                dist.broadcast(buf, src=0)
+
+        subnet_path = os.path.join(args.subnet_out_dir, f"subnet_{subnet_id}")
+        os.makedirs(subnet_path, exist_ok=True)
+
+        # DistributedRunManager with init=False so it does NOT reinitialise
+        # the weights we just copied from the supernet.
+        run_manager = DistributedRunManager(
+            subnet_path,
+            subnet,
+            run_config,
+            backward_steps=1,   # no gradient accumulation for a fixed subnet
+            is_root=is_root,
+            init=False,         # preserve pretrained weights!
+        )
+        run_manager.save_config()
+
+        # Fine-tune.
+        run_manager.train(subnet_args, warmup_epochs=0, warmup_lr=args.subnet_lr)
+
+        # Final validation on the test split.
+        _, val_loss, val_top1, val_top5 = run_manager.validate_all_resolution(
+            is_test=True
+        )
+        final_acc = list_mean(val_top1)
+
+        # Save a clean, standalone state-dict for direct serving use.
+        # This file can be loaded with: torch.load(path)["state_dict"]
+        if is_root:
+            standalone_path = os.path.join(subnet_path, f"subnet_{subnet_id}_final.pth.tar")
+            torch.save({"state_dict": subnet.state_dict()}, standalone_path)
+            gap = final_acc - expected_acc
+            print(
+                f"\nSubnet {subnet_id} done.\n"
+                f"  Achieved : {final_acc:.3f}%\n"
+                f"  Expected : {expected_acc:.3f}%\n"
+                f"  Gap      : {gap:+.3f}%\n"
+                f"  Saved to : {standalone_path}"
+            )
+
+        results.append(
+            {
+                "id": subnet_id,
+                "expected": expected_acc,
+                "achieved": final_acc,
+            }
+        )
+
+    # Summary table.
+    if is_root:
+        print(f"\n{'='*70}")
+        print("All subnets trained.  Summary:")
+        print(f"  {'ID':>3}  {'Expected':>10}  {'Achieved':>10}  {'Gap':>8}")
+        print("  " + "-" * 38)
+        for r in results:
+            gap = r["achieved"] - r["expected"]
+            flag = "  <-- check!" if abs(gap) > 2.0 else ""
+            print(
+                f"  {r['id']:>3}  {r['expected']:>10.3f}  "
+                f"{r['achieved']:>10.3f}  {gap:>+8.3f}{flag}"
+            )
+        print(f"{'='*70}\n")
+
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -229,7 +496,18 @@ if __name__ == "__main__":
         args.dy_conv_scaling_mode = None
     DynamicSeparableConv2d.KERNEL_TRANSFORM_MODE = args.dy_conv_scaling_mode
 
-    # Build OFA-ResNet50 supernet
+    # -----------------------------------------------------------------------
+    # Branch: individual subnet fine-tuning
+    # -----------------------------------------------------------------------
+    if args.train_subnets:
+        train_individual_subnets(args, run_config, is_root, num_gpus)
+        if dist.is_initialized():
+            dist.destroy_process_group()
+        exit(0)
+
+    # -----------------------------------------------------------------------
+    # Branch: full OFA progressive-shrinking supernet training
+    # -----------------------------------------------------------------------
     args.width_mult_list = [float(w) for w in args.width_mult_list.split(",")]
     args.expand_list = [float(e) for e in args.expand_list.split(",")]
     args.depth_list = [int(d) for d in args.depth_list.split(",")]
