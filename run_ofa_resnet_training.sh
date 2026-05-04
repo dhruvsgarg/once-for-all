@@ -117,7 +117,8 @@ import sys, os
 try:
     import yaml
 except ImportError:
-    sys.exit(0)
+    print("ERROR: pyyaml not installed — run: pip install pyyaml", file=sys.stderr)
+    sys.exit(1)
 cfg_path = os.path.join('${SCRIPT_DIR}', 'cluster-configs.yaml')
 try:
     with open(cfg_path) as f:
