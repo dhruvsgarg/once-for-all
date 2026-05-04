@@ -122,7 +122,7 @@ parser.add_argument(
 parser.add_argument(
     "--subnet_epochs",
     type=int,
-    default=30,
+    default=100,
     help="Fine-tuning epochs per subnet when --train_subnets is set.",
 )
 parser.add_argument(
