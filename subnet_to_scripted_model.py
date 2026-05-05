@@ -6,6 +6,7 @@ import torch
 import torch.jit
 
 from ofa.imagenet_classification.elastic_nn.networks import OFAResNets
+from ofa.imagenet_classification.networks import ResNets
 
 LATENCY_CONFIG_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -28,6 +29,27 @@ def extract_state_dict(checkpoint):
         if all(isinstance(v, torch.Tensor) for v in checkpoint.values()):
             return checkpoint
     return None
+
+
+def build_subnet_from_config(subdir_path, latency_cfg, subnet_id):
+    net_config_path = os.path.join(subdir_path, "net.config")
+    if os.path.isfile(net_config_path):
+        with open(net_config_path, "r") as f:
+            net_cfg = json.load(f)
+        return ResNets.build_from_config(net_cfg)
+
+    subnet_cfg = latency_cfg[subnet_id]["subnet_dimension"]
+    depth_values = subnet_cfg["depth_values"]
+    elasticity_ratio = subnet_cfg["elasticity_ratio"]
+    width_multiplier = subnet_cfg["width_multiplier"]
+
+    full_net = OFAResNets()
+    full_net.set_active_subnet(
+        d=depth_values,
+        e=elasticity_ratio,
+        w=width_multiplier,
+    )
+    return full_net.get_active_subnet(preserve_weight=False)
 
 
 def main(checkpoints_root):
@@ -53,18 +75,7 @@ def main(checkpoints_root):
         ckpt_path = os.path.join(subdir_path, ckpt_files[0])
         print(f"Processing {ckpt_path}")
 
-        subnet_cfg = latency_cfg[subnet_id]["subnet_dimension"]
-        depth_values = subnet_cfg["depth_values"]
-        elasticity_ratio = subnet_cfg["elasticity_ratio"]
-        width_multiplier = subnet_cfg["width_multiplier"]
-
-        full_net = OFAResNets()
-        full_net.set_active_subnet(
-            d=depth_values,
-            e=elasticity_ratio,
-            w=width_multiplier,
-        )
-        subnet = full_net.get_active_subnet(preserve_weight=False)
+        subnet = build_subnet_from_config(subdir_path, latency_cfg, subnet_id)
 
         checkpoint = torch.load(ckpt_path, map_location="cpu")
         state_dict = extract_state_dict(checkpoint)
