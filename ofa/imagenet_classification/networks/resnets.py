@@ -39,8 +39,8 @@ class ResNets(MyNetwork):
         x = self.classifier(x)
         return x
 
-    @torch.jit.ignore
     @property
+    @torch.jit.ignore
     def module_str(self):
         _str = ""
         for layer in self.input_stem:
@@ -52,8 +52,8 @@ class ResNets(MyNetwork):
         _str += self.classifier.module_str
         return _str
 
-    @torch.jit.ignore
     @property
+    @torch.jit.ignore
     def config(self):
         return {
             "name": ResNets.__name__,
