@@ -84,7 +84,21 @@ def main(checkpoints_root):
         subnet.load_state_dict(state_dict)
 
         subnet.eval()
-        scripted_model = torch.jit.script(subnet)
+        try:
+            scripted_model = torch.jit.script(subnet)
+        except Exception as e:
+            print(f"TorchScript failed for {subdir}, falling back to trace: {e}")
+            dummy_input = torch.randn(1, 3, 224, 224)
+            check_inputs = [
+                (torch.randn(4, 3, 224, 224),),
+                (torch.randn(1, 3, 256, 256),),
+            ]
+            scripted_model = torch.jit.trace(
+                subnet,
+                dummy_input,
+                strict=False,
+                check_inputs=check_inputs,
+            )
 
         pt_path = os.path.join(subdir_path, f"{subdir}_final_model.pt")
         scripted_model.save(pt_path)
