@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 from ofa.utils.layers import (
@@ -38,6 +39,7 @@ class ResNets(MyNetwork):
         x = self.classifier(x)
         return x
 
+    @torch.jit.ignore
     @property
     def module_str(self):
         _str = ""
@@ -50,6 +52,7 @@ class ResNets(MyNetwork):
         _str += self.classifier.module_str
         return _str
 
+    @torch.jit.ignore
     @property
     def config(self):
         return {
