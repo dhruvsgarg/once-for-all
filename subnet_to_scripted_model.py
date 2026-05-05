@@ -21,11 +21,25 @@ def main(checkpoints_root):
 		# 1. Load model
 		model = OFAResNets()
 		checkpoint = torch.load(ckpt_path, map_location='cpu')
-		# model.load_state_dict(checkpoint['model_state']) # or just checkpoint
-		try:
-			model.load_state_dict(checkpoint)
-		except Exception:
-			model.load_state_dict(checkpoint['model_state'])
+		# Try to load the state dict from possible keys
+		state_dict = None
+		if isinstance(checkpoint, dict):
+			if 'state_dict' in checkpoint:
+				state_dict = checkpoint['state_dict']
+			elif 'model_state' in checkpoint:
+				state_dict = checkpoint['model_state']
+			else:
+				# If all values are tensors, treat as state_dict
+				if all(isinstance(v, torch.Tensor) for v in checkpoint.values()):
+					state_dict = checkpoint
+		if state_dict is None:
+			# Fallback: try loading as raw state dict
+			try:
+				model.load_state_dict(checkpoint)
+			except Exception as e:
+				raise RuntimeError(f"Could not load state dict from {ckpt_path}: {e}")
+		else:
+			model.load_state_dict(state_dict)
 
 		# 2. Set to eval mode
 		model.eval()
