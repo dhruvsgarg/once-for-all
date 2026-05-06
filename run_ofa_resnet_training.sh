@@ -57,6 +57,7 @@ SUBNET_CONFIG_JSON=""
 SUBNET_OUT_DIR=""
 SUBNET_EPOCHS=30
 SUBNET_LR="2.5e-3"
+SUBNET_IDS=""
 
 # ── Override-tracking (so cluster preset doesn't clobber explicit flags) ──────
 _USER_IMAGENET=0
@@ -87,6 +88,7 @@ MODE B – Subnet fine-tuning:
                                     (default: /coc/scratch/dgarg/finetuned_subnets)
   --subnet_epochs N                 Epochs per subnet (default: 30)
   --subnet_lr F                     Base LR per GPU (default: 2.5e-3)
+  --subnet_ids LIST                 Comma-separated subnet ids to train (e.g., 0,2,5)
   --nproc_per_node N                GPUs to use (default: 8)
   --imagenet_path PATH              ImageNet root (required for data loading)
 
@@ -109,6 +111,7 @@ while [[ $# -gt 0 ]]; do
         --subnet_out_dir)     SUBNET_OUT_DIR="$2";                             shift 2 ;;
         --subnet_epochs)      SUBNET_EPOCHS="$2";                              shift 2 ;;
         --subnet_lr)          SUBNET_LR="$2";                                  shift 2 ;;
+        --subnet_ids)         SUBNET_IDS="$2";                                 shift 2 ;;
         --force)              FORCE=1;                                          shift   ;;
         -h|--help)            usage ;;
         *) echo "ERROR: Unknown argument: $1"; usage ;;
@@ -195,6 +198,7 @@ if [[ $TRAIN_SUBNETS -eq 1 ]]; then
     printf "  %-22s %s\n" "subnet_out_dir:"   "$SUBNET_OUT_DIR"
     printf "  %-22s %s\n" "subnet_epochs:"    "$SUBNET_EPOCHS"
     printf "  %-22s %s\n" "subnet_lr:"        "$SUBNET_LR"
+    [[ -n "$SUBNET_IDS" ]] && printf "  %-22s %s\n" "subnet_ids:"      "$SUBNET_IDS"
 else
     printf "  %-22s %s  [%s]\n" "checkpoint_dir:"   "$CHECKPOINT_DIR"  "$(_src_label $_USER_CKPT "$CLUSTER")"
     printf "  %-22s %s\n"       "force:"            "$( [[ $FORCE -eq 1 ]] && echo yes || echo no )"
@@ -242,7 +246,8 @@ run_subnet_finetuning() {
             --subnet_out_dir      "$SUBNET_OUT_DIR" \
             --subnet_epochs       "$SUBNET_EPOCHS" \
             --subnet_lr           "$SUBNET_LR" \
-            --imagenet_path       "$IMAGENET_PATH"
+            --imagenet_path       "$IMAGENET_PATH" \
+            ${SUBNET_IDS:+--subnet_ids "$SUBNET_IDS"}
 
     local ELAPSED=$(( SECONDS - START ))
     echo ""
