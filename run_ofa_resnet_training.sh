@@ -9,7 +9,7 @@
 # MODE B ─ Subnet fine-tuning (--train_subnets)
 #   Fine-tunes 6 specific subnets from a base ResNet50D checkpoint.
 #   No progressive-shrinking stages required.
-#   Outputs go to --subnet_out_dir (default: /coc/scratch/dgarg/finetuned_subnets),
+#   Outputs go to --subnet_out_dir (default: /coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets),
 #   completely separate from the supernet checkpoint tree.
 #
 # ── Supernet training ─────────────────────────────────────────────────────────
@@ -22,9 +22,9 @@
 #
 # ── Subnet fine-tuning ────────────────────────────────────────────────────────
 #   bash run_ofa_resnet_training.sh --train_subnets \
-#       --pretrained_ckpt  /coc/scratch/dgarg/resnet50d_base.pth.tar \
+#       --pretrained_ckpt  /coc/scratch/dgarg/resnet50d_pretrained.pth.tar \
 #       --subnet_config_json latency_curves_supernet_resnet_A40_with_stages_29apr26.json \
-#       --subnet_out_dir   /coc/scratch/dgarg/finetuned_subnets \
+#       --subnet_out_dir   /coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets \
 #       --nproc_per_node   4
 #
 #   Optional fine-tuning knobs (shown with defaults):
@@ -52,7 +52,6 @@ CHECKPOINT_DIR=""
 MASTER_ADDR=""
 
 # ── Subnet-mode defaults ──────────────────────────────────────────────────────
-PRETRAINED_CKPT=""     # INPUT base ResNet50D checkpoint (read-only)
 SUBNET_CONFIG_JSON=""
 SUBNET_OUT_DIR=""
 SUBNET_EPOCHS=30
@@ -82,10 +81,9 @@ MODE A – Supernet training (default):
 
 MODE B – Subnet fine-tuning:
   --train_subnets                   Enable subnet fine-tuning mode
-  --pretrained_ckpt PATH            INPUT base ResNet50D checkpoint (required)
   --subnet_config_json PATH         Subnet config JSON (required)
   --subnet_out_dir DIR              Output dir for fine-tuned subnets
-                                    (default: /coc/scratch/dgarg/finetuned_subnets)
+                                    (default: /coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets)
   --subnet_epochs N                 Epochs per subnet (default: 30)
   --subnet_lr F                     Base LR per GPU (default: 2.5e-3)
   --subnet_ids LIST                 Comma-separated subnet ids to train (e.g., 0,2,5)
@@ -106,7 +104,6 @@ while [[ $# -gt 0 ]]; do
         --nproc_per_node)     NPROC_PER_NODE="$2";  _USER_NPROC=1;             shift 2 ;;
         --master_addr)        MASTER_ADDR="$2";     _USER_ADDR=1;              shift 2 ;;
         --master_port)        MASTER_PORT="$2";     _USER_PORT=1;              shift 2 ;;
-        --pretrained_ckpt)    PRETRAINED_CKPT="$2";                            shift 2 ;;
         --subnet_config_json) SUBNET_CONFIG_JSON="$2";                         shift 2 ;;
         --subnet_out_dir)     SUBNET_OUT_DIR="$2";                             shift 2 ;;
         --subnet_epochs)      SUBNET_EPOCHS="$2";                              shift 2 ;;
@@ -155,7 +152,7 @@ fi
 [[ -z "$IMAGENET_PATH"  ]] && IMAGENET_PATH="/coc/data/datasets/ImageNet"
 [[ -z "$CHECKPOINT_DIR" ]] && CHECKPOINT_DIR="/coc/scratch/dgarg/ofa_checkpoints"
 [[ -z "$MASTER_ADDR"    ]] && MASTER_ADDR="127.0.0.1"
-[[ -z "$SUBNET_OUT_DIR" ]] && SUBNET_OUT_DIR="/coc/scratch/dgarg/finetuned_subnets"
+[[ -z "$SUBNET_OUT_DIR" ]] && SUBNET_OUT_DIR="/coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets"
 
 # ── Validate common paths ─────────────────────────────────────────────────────
 if [[ ! -d "$IMAGENET_PATH" ]]; then
@@ -193,7 +190,6 @@ printf "  %-22s %s  [%s]\n" "imagenet_path:"    "$IMAGENET_PATH"   "$(_src_label
 printf "  %-22s %s  [%s]\n" "nproc_per_node:"   "$NPROC_PER_NODE"  "$(_src_label $_USER_NPROC '')"
 
 if [[ $TRAIN_SUBNETS -eq 1 ]]; then
-    printf "  %-22s %s\n" "pretrained_ckpt:"  "$PRETRAINED_CKPT"
     printf "  %-22s %s\n" "subnet_config_json:" "$SUBNET_CONFIG_JSON"
     printf "  %-22s %s\n" "subnet_out_dir:"   "$SUBNET_OUT_DIR"
     printf "  %-22s %s\n" "subnet_epochs:"    "$SUBNET_EPOCHS"
@@ -210,13 +206,10 @@ echo "════════════════════════�
 # ═════════════════════════════════════════════════════════════════════════════
 
 run_subnet_finetuning() {
-    if [[ -z "$PRETRAINED_CKPT" ]]; then
-        echo "ERROR: --pretrained_ckpt is required in subnet fine-tuning mode."
-        echo "       Provide the path to your base ResNet50D checkpoint (.pth.tar)."
-        exit 1
-    fi
-    if [[ ! -f "$PRETRAINED_CKPT" ]]; then
-        echo "ERROR: Pretrained checkpoint not found: $PRETRAINED_CKPT"
+    local BASE_CKPT="$CHECKPOINT_DIR/resnet50d_pretrained.pth.tar"
+    if [[ ! -f "$BASE_CKPT" ]]; then
+        echo "ERROR: Base ResNet50D checkpoint not found: $BASE_CKPT"
+        echo "       Place it in the checkpoint dir root or pass --checkpoint_dir accordingly."
         exit 1
     fi
     if [[ -z "$SUBNET_CONFIG_JSON" ]]; then
@@ -241,7 +234,7 @@ run_subnet_finetuning() {
         --master_port="$MASTER_PORT" \
         "$SCRIPT_DIR/train_ofa_resnet.py" \
             --train_subnets \
-            --ofa_checkpoint_path "$PRETRAINED_CKPT" \
+            --ofa_checkpoint_path "$BASE_CKPT" \
             --subnet_config_json  "$SUBNET_CONFIG_JSON" \
             --subnet_out_dir      "$SUBNET_OUT_DIR" \
             --subnet_epochs       "$SUBNET_EPOCHS" \

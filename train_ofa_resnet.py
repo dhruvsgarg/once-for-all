@@ -10,12 +10,12 @@
 # Individual subnet fine-tuning (6 specific subnets from a JSON config):
 #   --ofa_checkpoint_path is the INPUT base ResNet50D checkpoint (read-only).
 #   --subnet_out_dir is where each fine-tuned subnet is written (default:
-#     /coc/scratch/dgarg/finetuned_subnets, separate from OFA stage dirs).
+#     /coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets, separate from OFA stage dirs).
 #
 #   python train_ofa_resnet.py --train_subnets \
 #       --subnet_config_json latency_curves_supernet_resnet_A40_with_stages_29apr26.json \
 #       --ofa_checkpoint_path /coc/scratch/dgarg/resnet50d_base.pth.tar \
-#       --subnet_out_dir /coc/scratch/dgarg/finetuned_subnets \
+#       --subnet_out_dir /coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets \
 #       --subnet_epochs 30 --subnet_lr 2.5e-3
 
 import argparse
@@ -115,7 +115,7 @@ parser.add_argument(
     help=(
         "Output root for subnet fine-tuning checkpoints. "
         "Each subnet is saved under <subnet_out_dir>/subnet_<id>/. "
-        "Defaults to /coc/scratch/dgarg/finetuned_subnets so it stays "
+        "Defaults to /coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets so it stays "
         "separate from the OFA progressive-shrinking stage directories."
     ),
 )
@@ -155,7 +155,7 @@ if args.train_subnets:
     # We set stubs so downstream code that unconditionally reads these attributes
     # (e.g. image-size parsing) still finds valid values.
     if args.subnet_out_dir is None:
-        args.subnet_out_dir = "/coc/scratch/dgarg/finetuned_subnets"
+        args.subnet_out_dir = "/coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets"
     args.path = args.subnet_out_dir  # used only for os.makedirs in __main__
     args.dynamic_batch_size = 1
     args.n_epochs = args.subnet_epochs

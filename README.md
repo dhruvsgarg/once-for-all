@@ -254,14 +254,14 @@ produces standalone checkpoints you can load directly without any OFA
 infrastructure.
 
 Pass `--train_subnets` plus a JSON file that describes the subnets.  Outputs
-go to `--subnet_out_dir` (default `/coc/scratch/dgarg/finetuned_subnets`),
+go to `--subnet_out_dir` (default `/coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets`),
 entirely separate from the supernet checkpoint tree.
 
 ```bash
 bash run_ofa_resnet_training.sh --train_subnets \
     --pretrained_ckpt  /coc/scratch/dgarg/resnet50d_base.pth.tar \
     --subnet_config_json latency_curves_supernet_resnet_A40_with_stages_29apr26.json \
-    --subnet_out_dir   /coc/scratch/dgarg/finetuned_subnets \
+    --subnet_out_dir   /coc/scratch/dgarg/ofa_checkpoints/finetuned_subnets \
     --nproc_per_node   4
 
 # Optional knobs (shown with defaults):
