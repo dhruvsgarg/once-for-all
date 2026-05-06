@@ -131,6 +131,15 @@ parser.add_argument(
     default=2.5e-3,
     help="Base learning rate per GPU for subnet fine-tuning.",
 )
+parser.add_argument(
+    "--subnet_ids",
+    type=str,
+    default=None,
+    help=(
+        "Optional comma-separated subnet ids to train (e.g., '0,2,5'). "
+        "If omitted, all subnets in --subnet_config_json are trained."
+    ),
+)
 
 args = parser.parse_args()
 
@@ -281,6 +290,12 @@ def train_individual_subnets(args, run_config, is_root, num_gpus):
     with open(args.subnet_config_json) as f:
         config_data = json.load(f)
     subnets_cfg = config_data["models"]
+    selected_ids = None
+    if args.subnet_ids:
+        selected_ids = {int(x) for x in args.subnet_ids.split(",") if x.strip()}
+        subnets_cfg = [s for s in subnets_cfg if s.get("id") in selected_ids]
+        if is_root:
+            print(f"Filtering subnets to ids: {sorted(selected_ids)}")
 
     if is_root:
         print(
